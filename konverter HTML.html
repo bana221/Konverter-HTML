@@ -1,0 +1,765 @@
+<!doctype html>
+<html lang="id" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML Workspace & Converter Pro</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <!-- Lucide Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <!-- SDKs -->
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --surface-color: #1e293b;
+      --text-color: #e2e8f0;
+      --primary-action: #38bdf8;
+      --secondary-action: #94a3b8;
+      --font-family: 'Outfit';
+    }
+
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+    }
+    
+    body { 
+      font-family: var(--font-family), 'Outfit', sans-serif; 
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    
+    .code-area { 
+      font-family: 'JetBrains Mono', monospace; 
+    }
+    
+    .btn-glow {
+      position: relative;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-glow:hover { 
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.4); 
+      transform: translateY(-1px);
+    }
+
+    .btn-glow:active {
+      transform: translateY(1px);
+    }
+    
+    .format-card { 
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
+    }
+    
+    .format-card:hover { 
+      transform: translateY(-2px); 
+    }
+    
+    .toast-in { 
+      animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+    }
+    
+    @keyframes slideUp { 
+      from { opacity: 0; transform: translate(-50%, 20px); } 
+      to { opacity: 1; transform: translate(-50%, 0); } 
+    }
+    
+    .fade-in { 
+      animation: fadeIn 0.4s ease-out; 
+    }
+    
+    @keyframes fadeIn { 
+      from { opacity: 0; } 
+      to { opacity: 1; } 
+    }
+
+    /* Custom Scrollbar for editor */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.5);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.3);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(148, 163, 184, 0.5);
+    }
+  </style>
+</head>
+<body class="h-full overflow-hidden flex flex-col">
+
+  <header class="border-b border-[#334155]/60 bg-[#1e293b]/80 backdrop-blur-md px-6 py-4 flex flex-wrap items-center justify-between gap-4 z-10 shrink-0">
+    <div class="flex items-center gap-3">
+      <div class="p-2.5 rounded-xl bg-[#38bdf8]/10 text-[#38bdf8] flex items-center justify-center">
+        <i data-lucide="code-2" class="w-6 h-6"></i>
+      </div>
+      <div>
+        <h1 id="title" class="text-xl font-bold tracking-tight text-[#f8fafc]">HTML Workspace & Converter Pro</h1>
+        <p class="text-xs text-[#94a3b8]">Tulis, format, pratinjau langsung, dan konversi kode HTML dengan instan</p>
+      </div>
+    </div>
+    
+    <!-- Quick Boilerplate Injector -->
+    <div class="flex items-center gap-2">
+      <label for="boilerplate-select" class="text-xs text-[#94a3b8] font-medium hidden sm:inline">Template Kilat:</label>
+      <div class="relative">
+        <select id="boilerplate-select" class="appearance-none bg-[#0f172a] border border-[#334155] rounded-xl pl-4 pr-10 py-2 text-xs text-[#e2e8f0] focus:outline-none focus:border-[#38bdf8] cursor-pointer">
+          <option value="" disabled selected>Pilih Boilerplate...</option>
+          <option value="basic">HTML5 Standar</option>
+          <option value="tailwind">Tailwind Landing Page</option>
+          <option value="form">Form Kontak Modern</option>
+          <option value="game">Game Canvas Sederhana</option>
+          <option value="article">Artikel Blog Kaya Konten</option>
+        </select>
+        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#94a3b8]">
+          <i data-lucide="chevron-down" class="w-4 h-4"></i>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-0">
+    
+    <!-- LEFT SIDE: Editor & Controls -->
+    <section class="lg:col-span-7 flex flex-col h-full border-r border-[#334155]/60 overflow-hidden">
+      <!-- Toolbar atas editor -->
+      <div class="bg-[#1e293b]/40 px-4 py-2.5 border-b border-[#334155]/60 flex items-center justify-between gap-2 shrink-0">
+        <span class="text-xs font-semibold tracking-wider uppercase text-[#94a3b8] flex items-center gap-1.5">
+          <i data-lucide="terminal" class="w-3.5 h-3.5"></i> Editor HTML
+        </span>
+        
+        <!-- Utility Actions -->
+        <div class="flex items-center gap-1">
+          <button id="btn-beautify" title="Rapikan Indentasi HTML" class="px-2.5 py-1.5 rounded-lg bg-[#334155]/50 hover:bg-[#334155] text-xs text-[#38bdf8] transition-all flex items-center gap-1">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Beautify
+          </button>
+          <button id="btn-minify" title="Kompresi HTML menjadi 1 baris" class="px-2.5 py-1.5 rounded-lg bg-[#334155]/50 hover:bg-[#334155] text-xs text-[#38bdf8] transition-all flex items-center gap-1">
+            <i data-lucide="compress" class="w-3.5 h-3.5"></i> Minify
+          </button>
+          <button id="btn-extract-text" title="Ekstrak teks murni saja" class="px-2.5 py-1.5 rounded-lg bg-[#334155]/50 hover:bg-[#334155] text-xs text-[#38bdf8] transition-all flex items-center gap-1">
+            <i data-lucide="file-text" class="w-3.5 h-3.5"></i> Teks Saja
+          </button>
+        </div>
+      </div>
+
+      <!-- Textarea Input Container -->
+      <div class="flex-1 relative">
+        <textarea id="html-input" class="code-area w-full h-full bg-[#0f172a] p-5 text-sm text-[#e2e8f0] focus:outline-none resize-none placeholder-[#475569] leading-relaxed" placeholder="<!-- Masukkan kode HTML Anda di sini -->&#10;<h1>Selamat Datang di HTML Workspace!</h1>&#10;<p>Ketik langsung atau klik menu 'Template Kilat' di atas untuk memulai desain Anda dengan mudah.</p>"></textarea>
+      </div>
+
+      <!-- Editor Footer Info -->
+      <div class="bg-[#1e293b]/50 px-4 py-2 border-t border-[#334155]/60 flex justify-between items-center text-xs text-[#64748b] shrink-0">
+        <span id="char-count" class="font-mono">0 karakter | 0 baris</span>
+        <button id="btn-clear" class="hover:text-red-400 transition-colors flex items-center gap-1 font-medium">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Bersihkan Workspace
+        </button>
+      </div>
+    </section>
+
+    <!-- RIGHT SIDE: Preview Panel & Exporter -->
+    <section class="lg:col-span-5 flex flex-col h-full bg-[#0f172a] overflow-y-auto">
+      
+      <!-- Preview Frame Header -->
+      <div class="bg-[#1e293b]/40 px-4 py-2.5 border-b border-[#334155]/60 flex items-center justify-between shrink-0">
+        <span class="text-xs font-semibold tracking-wider uppercase text-[#94a3b8] flex items-center gap-1.5">
+          <i data-lucide="eye" class="w-3.5 h-3.5"></i> Pratinjau Langsung
+        </span>
+        <div class="flex items-center gap-1.5">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="text-[10px] text-emerald-400 font-mono uppercase tracking-widest">Active Render</span>
+        </div>
+      </div>
+
+      <!-- Realtime Interactive Preview Frame -->
+      <div class="h-64 sm:h-80 lg:h-2/5 min-h-[220px] bg-white border-b border-[#334155]/60 relative">
+        <iframe id="preview-frame" sandbox="allow-scripts" class="w-full h-full bg-white"></iframe>
+        <div id="preview-placeholder" class="absolute inset-0 bg-[#1e293b] flex flex-col items-center justify-center text-center p-4">
+          <i data-lucide="code" class="w-10 h-10 text-[#475569] mb-2 id-pulse"></i>
+          <p class="text-sm font-medium text-[#94a3b8]">Belum ada markup HTML</p>
+          <p class="text-xs text-[#475569] mt-1">Mulai mengetik di workspace kiri untuk me-render halaman</p>
+        </div>
+      </div>
+
+      <!-- Export Configurations -->
+      <div class="p-6 flex-1 flex flex-col justify-between gap-6">
+        <div>
+          <h3 class="text-sm font-semibold tracking-wider uppercase text-[#94a3b8] mb-3 flex items-center gap-1.5">
+            <i data-lucide="settings-2" class="w-4 h-4"></i> Opsi Export Dokumen
+          </h3>
+
+          <!-- Format Grid Selection -->
+          <div class="grid grid-cols-2 xs:grid-cols-3 gap-3 mb-5" id="format-grid">
+            <button data-fmt="html" class="format-card active bg-[#1e293b] border-2 border-[#38bdf8] rounded-xl p-3 text-left flex flex-col justify-between h-20 shadow-md">
+              <span class="text-lg font-bold text-[#38bdf8] font-mono">.HTML</span>
+              <span class="text-[10px] text-[#94a3b8] leading-tight">Halaman Web Mandiri</span>
+            </button>
+            
+            <button data-fmt="txt" class="format-card bg-[#1e293b]/40 border-2 border-[#334155] rounded-xl p-3 text-left flex flex-col justify-between h-20 shadow-md">
+              <span class="text-lg font-bold text-[#e2e8f0] font-mono">.TXT</span>
+              <span class="text-[10px] text-[#94a3b8] leading-tight">Salinan Teks Biasa</span>
+            </button>
+            
+            <button data-fmt="xml" class="format-card bg-[#1e293b]/40 border-2 border-[#334155] rounded-xl p-3 text-left flex flex-col justify-between h-20 shadow-md">
+              <span class="text-lg font-bold text-[#e2e8f0] font-mono">.XML</span>
+              <span class="text-[10px] text-[#94a3b8] leading-tight">Data Markup XML</span>
+            </button>
+            
+            <button data-fmt="json" class="format-card bg-[#1e293b]/40 border-2 border-[#334155] rounded-xl p-3 text-left flex flex-col justify-between h-20 shadow-md">
+              <span class="text-lg font-bold text-[#e2e8f0] font-mono">.JSON</span>
+              <span class="text-[10px] text-[#94a3b8] leading-tight">Data Objek Ter-parse</span>
+            </button>
+
+            <button data-fmt="md" class="format-card bg-[#1e293b]/40 border-2 border-[#334155] rounded-xl p-3 text-left flex flex-col justify-between h-20 shadow-md">
+              <span class="text-lg font-bold text-[#e2e8f0] font-mono">.MD</span>
+              <span class="text-[10px] text-[#94a3b8] leading-tight">Markdown Konversi</span>
+            </button>
+          </div>
+
+          <!-- Filename Setting -->
+          <div class="mb-5">
+            <label for="filename" class="block text-xs font-semibold text-[#94a3b8] mb-2 uppercase tracking-wider">Nama Output File</label>
+            <div class="flex gap-1.5">
+              <input id="filename" type="text" value="workspace-dokumen" class="flex-1 bg-[#1e293b] border border-[#334155] rounded-xl px-4 py-3 text-sm text-[#e2e8f0] focus:outline-none focus:border-[#38bdf8] placeholder-[#475569] font-medium" placeholder="nama-file">
+              <span id="ext-label" class="flex items-center justify-center bg-[#334155] rounded-xl px-4 text-sm font-mono font-bold text-[#38bdf8] min-w-[70px]">.html</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Download Action Button -->
+        <div class="mt-auto">
+          <button id="btn-download" class="btn-glow w-full bg-[#38bdf8] hover:bg-[#0ea5e9] text-[#0f172a] font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2.5 text-base shadow-lg shadow-[#38bdf8]/10">
+            <i data-lucide="download" class="w-5 h-5"></i> Unduh Berkas Sekarang
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Global UI Notification Toast -->
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#22c55e] text-[#0f172a] font-semibold px-6 py-3.5 rounded-xl shadow-2xl hidden toast-in text-sm flex items-center gap-2.5 z-50 border border-black/10"></div>
+
+  <script>
+    // State Management
+    let selectedFormat = 'html';
+    const textarea = document.getElementById('html-input');
+    const charCount = document.getElementById('char-count');
+    const extLabel = document.getElementById('ext-label');
+    const filenameInput = document.getElementById('filename');
+    const formatBtns = document.querySelectorAll('[data-fmt]');
+    const toast = document.getElementById('toast');
+    const previewFrame = document.getElementById('preview-frame');
+    const previewPlaceholder = document.getElementById('preview-placeholder');
+    const boilerplateSelect = document.getElementById('boilerplate-select');
+
+    // Preset Boilerplate Templates Code
+    const boilerplates = {
+      basic: `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Halaman HTML5 Standar</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 0 20px;
+      line-height: 1.6;
+      color: #333;
+    }
+    h1 { color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;}
+    .card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Selamat Datang di Halaman Baru Anda</h1>
+  <p>Ini adalah template HTML5 standar minimalis lengkap dengan gaya internal yang bersih.</p>
+  <div class="card">
+    <h3>Pemberitahuan Utama</h3>
+    <p>Silakan edit blok kode ini di panel editor sebelah kiri untuk melihat pembaruan dinamis.</p>
+  </div>
+</body>
+</html>`,
+      tailwind: `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"><\/script>
+  <title>Landing Page Modern</title>
+</head>
+<body class="bg-slate-50 text-slate-800">
+  <section class="max-w-4xl mx-auto px-6 py-16 text-center">
+    <span class="px-3 py-1 text-xs font-semibold bg-indigo-100 text-indigo-700 rounded-full uppercase tracking-wider">Premium Template</span>
+    <h1 class="text-4xl sm:text-5xl font-black text-slate-900 mt-4 leading-tight">Desain Sempurna dengan Tailwind CSS</h1>
+    <p class="text-lg text-slate-600 mt-4 max-w-xl mx-auto">Buat komponen frontend impian Anda langsung di editor kami dengan dukungan rendering langsung secara presisi.</p>
+    <div class="mt-8 flex justify-center gap-3">
+      <a href="#" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-lg shadow-indigo-600/20 transition">Mulai Sekarang</a>
+      <a href="#" class="px-6 py-3 bg-white hover:bg-slate-100 text-slate-800 font-medium rounded-lg border border-slate-200 transition">Pelajari Lebih Lanjut</a>
+    </div>
+  </section>
+</body>
+</html>`,
+      form: `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"><\/script>
+  <title>Form Kontak Interaktif</title>
+</head>
+<body class="bg-gray-100 py-12 px-4">
+  <div class="max-w-md mx-auto bg-white rounded-2xl shadow-xl overflow-hidden p-8 border border-gray-100">
+    <h2 class="text-2xl font-bold text-gray-900 mb-2">Hubungi Kami</h2>
+    <p class="text-sm text-gray-500 mb-6">Kirimkan pesan Anda secara aman, tim kami akan merespons dalam 24 jam.</p>
+    
+    <form onsubmit="event.preventDefault(); window.parent.postMessage('formSubmitted', '*');">
+      <div class="mb-4">
+        <label class="block text-xs font-bold uppercase text-gray-700 mb-1">Nama Lengkap</label>
+        <input type="text" required class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition" placeholder="John Doe">
+      </div>
+      <div class="mb-4">
+        <label class="block text-xs font-bold uppercase text-gray-700 mb-1">Alamat Email</label>
+        <input type="email" required class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition" placeholder="johndoe@email.com">
+      </div>
+      <div class="mb-5">
+        <label class="block text-xs font-bold uppercase text-gray-700 mb-1">Isi Pesan</label>
+        <textarea rows="4" required class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition" placeholder="Tulis keluhan atau pertanyaan Anda di sini..."></textarea>
+      </div>
+      <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow-lg shadow-blue-600/20 transition-all">Kirim Pesan</button>
+    </form>
+  </div>
+</body>
+</html>`,
+      game: `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Game Retro Canvas</title>
+  <style>
+    body { margin: 0; background: #111827; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; font-family: monospace; color: #fff; overflow: hidden; }
+    canvas { background: #1f2937; border: 3px solid #4b5563; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+    h1 { font-size: 1.2rem; margin-bottom: 10px; color: #10b981; }
+    p { font-size: 0.8rem; color: #9ca3af; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>MINI BOX DODGER</h1>
+  <canvas id="gameCanvas" width="400" height="250"></canvas>
+  <p>Gunakan tombol PANAH Kiri / Kanan pada keyboard untuk menghindar!</p>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let player = { x: 180, y: 220, size: 20, speed: 5, color: "#10b981" };
+    let obstacle = { x: Math.random() * 380, y: 0, size: 20, speed: 3.5, color: "#ef4444" };
+    let score = 0;
+    let keys = {};
+
+    window.addEventListener("keydown", e => keys[e.code] = true);
+    window.addEventListener("keyup", e => keys[e.code] = false);
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw Player
+      ctx.fillStyle = player.color;
+      ctx.fillRect(player.x, player.y, player.size, player.size);
+      
+      // Draw Obstacle
+      ctx.fillStyle = obstacle.color;
+      ctx.fillRect(obstacle.x, obstacle.y, obstacle.size, obstacle.size);
+      
+      // Draw Score
+      ctx.fillStyle = "#fff";
+      ctx.font = "16px monospace";
+      ctx.fillText("SCORE: " + score, 15, 25);
+    }
+
+    function update() {
+      if (keys["ArrowLeft"] && player.x > 0) player.x -= player.speed;
+      if (keys["ArrowRight"] && player.x < canvas.width - player.size) player.x += player.speed;
+
+      obstacle.y += obstacle.speed;
+      if (obstacle.y > canvas.height) {
+        obstacle.y = 0;
+        obstacle.x = Math.random() * (canvas.width - obstacle.size);
+        obstacle.speed += 0.2;
+        score += 10;
+      }
+
+      // Collision Check
+      if (player.x < obstacle.x + obstacle.size &&
+          player.x + player.size > obstacle.x &&
+          player.y < obstacle.y + obstacle.size &&
+          player.y + player.size > obstacle.y) {
+        score = 0;
+        obstacle.y = 0;
+        obstacle.speed = 3.5;
+        obstacle.x = Math.random() * (canvas.width - obstacle.size);
+      }
+    }
+
+    function loop() {
+      update();
+      draw();
+      requestAnimationFrame(loop);
+    }
+    loop();
+  <\/script>
+</body>
+</html>`,
+      article: `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"><\/script>
+  <title>Artikel Blog</title>
+</head>
+<body class="bg-stone-50 py-10 text-stone-800">
+  <article class="max-w-2xl mx-auto px-6 bg-white py-12 rounded-2xl shadow-sm border border-stone-100">
+    <header class="mb-8">
+      <div class="flex gap-2 text-xs text-amber-700 font-bold uppercase mb-2">
+        <span>Teknologi</span> &bull; <span>Web Dev</span>
+      </div>
+      <h1 class="text-3xl font-serif font-bold text-stone-900 leading-tight">Evolusi Markup HTML di Era Modern</h1>
+      <p class="text-stone-500 text-sm mt-2">Diterbitkan pada Mei 2026 oleh Tim Editorial</p>
+    </header>
+    
+    <div class="prose prose-stone leading-relaxed space-y-6">
+      <p class="text-lg text-stone-600 italic">"HTML bukan sekadar struktur, ia adalah jembatan penyampai informasi universal."</p>
+      <p>Sejak diperkenalkan pertama kali oleh Tim Berners-Lee pada tahun 1991, HTML telah berkembang pesat dari sekadar dokumen hiperteks sederhana menjadi dasar dari platform aplikasi web yang sangat dinamis.</p>
+      <h3 class="text-xl font-bold text-stone-900 mt-6 font-serif">Masa Depan Web Adaptif</h3>
+      <p>Dengan integrasi teknologi mutakhir seperti komponen web native dan stylesheet yang semakin pintar, masa depan pengembangan web terus berfokus pada performa, aksesibilitas, dan kemudahan penyampaian data.</p>
+    </div>
+  </article>
+</body>
+</html>`
+    };
+
+    // Live rendering to Iframe with debounce to prevent laggy outputs
+    let renderTimeout;
+    function updatePreview() {
+      const code = textarea.value;
+      if (!code.trim()) {
+        previewPlaceholder.classList.remove('hidden');
+        previewFrame.classList.add('hidden');
+        return;
+      }
+
+      previewPlaceholder.classList.add('hidden');
+      previewFrame.classList.remove('hidden');
+
+      clearTimeout(renderTimeout);
+      renderTimeout = setTimeout(() => {
+        // Safe injection via srcdoc
+        previewFrame.srcdoc = code;
+      }, 300);
+    }
+
+    // Event listener for editor inputs
+    textarea.addEventListener('input', () => {
+      updateLinesAndChars();
+      updatePreview();
+    });
+
+    // Update lines and characters count UI
+    function updateLinesAndChars() {
+      const length = textarea.value.length;
+      const lines = textarea.value.split('\n').filter(Boolean).length;
+      charCount.textContent = `${length.toLocaleString('id-ID')} karakter | ${lines} baris`;
+    }
+
+    // Clear Workspace Action
+    document.getElementById('btn-clear').addEventListener('click', () => {
+      textarea.value = '';
+      updateLinesAndChars();
+      updatePreview();
+      showToast('Workspace berhasil dikosongkan!', '#f87171');
+    });
+
+    // Beautify HTML (Simple structural indentation)
+    document.getElementById('btn-beautify').addEventListener('click', () => {
+      let html = textarea.value.trim();
+      if (!html) return;
+      
+      let formatted = '';
+      let reg = /(>)(<)(\/*)/g;
+      html = html.replace(reg, '$1\r\n$2$3');
+      let pad = 0;
+      
+      html.split('\r\n').forEach((line) => {
+        let indent = 0;
+        if (line.match(/.+<\/\w[^>]*>$/)) {
+          indent = 0;
+        } else if (line.match(/^<\/\w/)) {
+          if (pad !== 0) pad -= 2;
+        } else if (line.match(/^<\w[^>]*[^\/]>.*$/)) {
+          indent = 2;
+        } else {
+          indent = 0;
+        }
+        
+        formatted += ' '.repeat(pad) + line + '\r\n';
+        pad += indent;
+      });
+      
+      textarea.value = formatted.trim();
+      updateLinesAndChars();
+      updatePreview();
+      showToast('HTML berhasil dirapikan!', '#22c55e');
+    });
+
+    // Minify HTML
+    document.getElementById('btn-minify').addEventListener('click', () => {
+      let html = textarea.value;
+      if (!html.trim()) return;
+      
+      // Remove comments and collapse spaces
+      let minified = html
+        .replace(/<!--[\s\S]*?-->/g, '')
+        .replace(/\s+/g, ' ')
+        .replace(/>\s+</g, '><')
+        .trim();
+        
+      textarea.value = minified;
+      updateLinesAndChars();
+      updatePreview();
+      showToast('HTML berhasil dikompresi (Minified)!', '#38bdf8');
+    });
+
+    // Extract Plain Text Only (Strips all HTML/CSS/JS tags)
+    document.getElementById('btn-extract-text').addEventListener('click', () => {
+      let html = textarea.value;
+      if (!html.trim()) return;
+
+      // Extract text content from markup safely using DOMParser
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      let extracted = doc.body.textContent || doc.documentElement.textContent || "";
+      
+      textarea.value = extracted.trim().replace(/\n\s*\n/g, '\n'); // remove empty lines
+      updateLinesAndChars();
+      updatePreview();
+      showToast('Teks murni berhasil diekstrak!', '#10b981');
+    });
+
+    // Boilerplate drop-down loader
+    boilerplateSelect.addEventListener('change', (e) => {
+      const val = e.target.value;
+      if (boilerplates[val]) {
+        textarea.value = boilerplates[val];
+        updateLinesAndChars();
+        updatePreview();
+        showToast('Template berhasil disematkan!', '#22c55e');
+      }
+    });
+
+    // Format Selection Action
+    formatBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        formatBtns.forEach(b => {
+          b.classList.remove('active', 'border-[#38bdf8]', 'bg-[#1e293b]');
+          b.classList.add('border-[#334155]', 'bg-[#1e293b]/40');
+          b.querySelector('span').classList.remove('text-[#38bdf8]');
+          b.querySelector('span').classList.add('text-[#e2e8f0]');
+        });
+        
+        btn.classList.add('active', 'border-[#38bdf8]', 'bg-[#1e293b]');
+        btn.classList.remove('border-[#334155]', 'bg-[#1e293b]/40');
+        
+        const mainSpan = btn.querySelector('span');
+        mainSpan.classList.remove('text-[#e2e8f0]');
+        mainSpan.classList.add('text-[#38bdf8]');
+        
+        selectedFormat = btn.dataset.fmt;
+        extLabel.textContent = '.' + selectedFormat;
+      });
+    });
+
+    // Show Toast Notification
+    function showToast(msg, color) {
+      toast.innerHTML = msg;
+      toast.style.backgroundColor = color || '#22c55e';
+      toast.classList.remove('hidden');
+      
+      // Auto dismiss
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3000);
+    }
+
+    // Converter Engine
+    function convertContent(html, fmt) {
+      if (fmt === 'html' || fmt === 'txt') {
+        return html;
+      }
+      
+      if (fmt === 'xml') {
+        // Basic markup to XML parsing safely
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const serializer = new XMLSerializer();
+        const xmlStr = serializer.serializeToString(doc);
+        return '<?xml version="1.0" encoding="UTF-8"?>\n<root>\n' + xmlStr + '\n</root>';
+      }
+      
+      if (fmt === 'json') {
+        try {
+          // Send back full detailed JSON breakdown of markup
+          return JSON.stringify({
+            status: "success",
+            format: "HTML Workspace Export",
+            timestamp: new Date().toISOString(),
+            raw_html: html,
+            details: {
+              characters: html.length,
+              lines: html.split('\n').length
+            }
+          }, null, 2);
+        } catch (e) {
+          return JSON.stringify({ html: html }, null, 2);
+        }
+      }
+
+      if (fmt === 'md') {
+        // Quick & light HTML to Markdown converter
+        let md = html
+          .replace(/<h1[^>]*>([\s\S]*?)<\/h1>/gi, '# $1\n\n')
+          .replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, '## $1\n\n')
+          .replace(/<h3[^>]*>([\s\S]*?)<\/h3>/gi, '### $1\n\n')
+          .replace(/<strong[^>]*>([\s\S]*?)<\/strong>/gi, '**$1**')
+          .replace(/<b[^>]*>([\s\S]*?)<\/b>/gi, '**$1**')
+          .replace(/<em[^>]*>([\s\S]*?)<\/em>/gi, '*$1*')
+          .replace(/<i[^>]*>([\s\S]*?)<\/i>/gi, '*$1*')
+          .replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, '$1\n\n')
+          .replace(/<br\s*\/?>/gi, '\n')
+          .replace(/<a[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, '[$2]($1)')
+          .replace(/<ul[^>]*>([\s\S]*?)<\/ul>/gi, '$1\n')
+          .replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, '* $1\n')
+          .replace(/<[^>]*>/g, ''); // strip remaining tags
+          
+        return md.trim();
+      }
+      
+      return html;
+    }
+
+    // Get MIME Types matching target outputs
+    function getMime(fmt) {
+      const m = { 
+        html: 'text/html', 
+        txt: 'text/plain', 
+        xml: 'application/xml', 
+        json: 'application/json',
+        md: 'text/markdown'
+      };
+      return m[fmt] || 'text/plain';
+    }
+
+    // Download File Action
+    document.getElementById('btn-download').addEventListener('click', () => {
+      const html = textarea.value.trim();
+      if (!html) { 
+        showToast('<i data-lucide="alert-circle" class="w-4 h-4 inline"></i> Silakan masukkan kode HTML terlebih dahulu!', '#f87171'); 
+        lucide.createIcons();
+        return; 
+      }
+      
+      const rawName = filenameInput.value.trim() || 'workspace-dokumen';
+      const name = rawName + '.' + selectedFormat;
+      const content = convertContent(html, selectedFormat);
+      
+      // Blob and trigger download anchor flow
+      const blob = new Blob([content], { type: getMime(selectedFormat) + ';charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = name;
+      link.style.display = 'none';
+      
+      document.body.appendChild(link);
+      link.click();
+      
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, 100);
+      
+      showToast(`<i data-lucide="check-circle" class="w-4 h-4 inline"></i> File <b>${name}</b> tersimpan di Downloads!`, '#22c55e');
+      lucide.createIcons();
+    });
+
+    // Element SDK Configurations
+    const defaultConfig = {
+      app_title: 'HTML Workspace & Converter Pro',
+      background_color: '#0f172a',
+      surface_color: '#1e293b',
+      text_color: '#e2e8f0',
+      primary_action: '#38bdf8',
+      secondary_action: '#94a3b8',
+      font_family: 'Outfit',
+      font_size: 16
+    };
+
+    function applyConfig(c) {
+      const root = document.documentElement;
+      if (c.background_color) root.style.setProperty('--bg-color', c.background_color);
+      if (c.surface_color) root.style.setProperty('--surface-color', c.surface_color);
+      if (c.text_color) root.style.setProperty('--text-color', c.text_color);
+      if (c.primary_action) root.style.setProperty('--primary-action', c.primary_action);
+      if (c.secondary_action) root.style.setProperty('--secondary-action', c.secondary_action);
+      if (c.font_family) root.style.setProperty('--font-family', c.font_family);
+      
+      const title = document.getElementById('title');
+      if (title) {
+        title.textContent = c.app_title || defaultConfig.app_title;
+        const base = c.font_size || defaultConfig.font_size;
+        title.style.fontSize = (base * 1.9) + 'px';
+      }
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange: async (c) => applyConfig(c),
+        mapToCapabilities: (c) => ({
+          recolorables: [
+            { get: () => c.background_color || defaultConfig.background_color, set: v => { c.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
+            { get: () => c.surface_color || defaultConfig.surface_color, set: v => { c.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
+            { get: () => c.text_color || defaultConfig.text_color, set: v => { c.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
+            { get: () => c.primary_action || defaultConfig.primary_action, set: v => { c.primary_action = v; window.elementSdk.setConfig({ primary_action: v }); } },
+            { get: () => c.secondary_action || defaultConfig.secondary_action, set: v => { c.secondary_action = v; window.elementSdk.setConfig({ secondary_action: v }); } }
+          ],
+          borderables: [],
+          fontEditable: { get: () => c.font_family || defaultConfig.font_family, set: v => { c.font_family = v; window.elementSdk.setConfig({ font_family: v }); } },
+          fontSizeable: { get: () => c.font_size || defaultConfig.font_size, set: v => { c.font_size = v; window.elementSdk.setConfig({ font_size: v }); } }
+        }),
+        mapToEditPanelValues: (c) => new Map([
+          ['app_title', c.app_title || defaultConfig.app_title]
+        ])
+      });
+    } else {
+      console.warn("Element SDK tidak terdeteksi. Berjalan dalam mode mandiri.");
+      applyConfig(defaultConfig);
+    }
+
+    lucide.createIcons();
+  </script>
+</body>
+</html>
